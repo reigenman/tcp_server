@@ -21,6 +21,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 find_package(Boost REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 # The compiled library code is here
 add_subdirectory(src)

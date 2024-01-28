@@ -20,13 +20,14 @@ add_library(${_target}
   client_registry.cpp
   client_controller.cpp
   thread_helper.cpp
+  hash_msg_handler.cpp
   ${HEADER_LIST}
 )
 
 # We need this directory, and users of our library will need it too
 target_include_directories(${_target} PUBLIC ../include)
 
-target_link_libraries(${_target} PUBLIC Boost::boost)
+target_link_libraries(${_target} PUBLIC Boost::boost OpenSSL::Crypto)
 
 target_compile_features(${_target} PUBLIC cxx_std_17)
 

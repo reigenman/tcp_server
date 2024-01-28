@@ -6,12 +6,7 @@ namespace simple_server {
 
 class HashStreamHandler : public StreamHandler {
 public:
-    void HandleMessage(const std::string_view & request, std::string & response) override
-    {
-        response = std::to_string(hasher_(request));
-    }
-private:
-    std::hash<std::string_view> hasher_;
+    void HandleMessage(const std::string_view & request, std::string & response) override;
 };
 
 
