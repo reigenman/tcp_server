@@ -8,8 +8,9 @@ namespace simple_server {
 
 class Server {
 public:
+
     // throws exception if can't bind listening socket
-    explicit Server(boost::asio::io_context & ioCtx, HandlerContextPtr handler, const std::string & address = "127.0.0.1", uint16_t port = 8088);
+    explicit Server(boost::asio::io_context & ioCtx, HandlerContextPtr handler, const std::string & address, uint16_t port);
     ~Server();
 
     Server(const Server &) = delete;

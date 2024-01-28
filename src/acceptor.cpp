@@ -13,6 +13,7 @@ Acceptor::Acceptor(net::io_context & ioContext, tcp::endpoint endpoint, Connecti
     if (!handler_) {
         throw std::invalid_argument("Acceptor(): invalid handler");
     }
+    std::cerr << boost::format("acceptor listens an address: %1% and port %2%\n") % endpoint.address().to_string() % endpoint.port();
 }
 
 Acceptor::~Acceptor()
