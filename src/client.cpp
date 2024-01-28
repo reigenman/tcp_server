@@ -7,6 +7,17 @@
 
 namespace simple_server {
 
+namespace {
+
+// telnet use \r\n
+std::string_view DbgMsgStrip(std::string_view msg)
+{
+    if (msg.empty() || msg.back() != '\r')
+        return msg;
+    return msg.substr(0, msg.size() - 1);
+}
+
+} // namespace
 
 Client::Client(tcp::socket && socket, StreamHandlerPtr streamHandler, std::shared_ptr<ClientRegistry> registry)
     : stream_(std::move(socket))
@@ -75,7 +86,7 @@ void Client::HandleRead(const bs::error_code & ec, size_t readNum)
 
     // don't modify rdBuf while line is used
     const auto line = std::string_view(rdBuf_).substr(0, readNum - 1);
-    std::cerr << boost::format("session %1% got message: \"%2%\", total buf size: %3%\n") % logTag_ % line % rdBuf_.size();
+    std::cerr << boost::format("session %1% got message: \"%2%\", total buf size: %3%\n") % logTag_ % DbgMsgStrip(line) % rdBuf_.size();
 
     wrBuf_.clear();
 

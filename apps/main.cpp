@@ -1,5 +1,6 @@
 #include <simple_server/server.hpp>
 #include <simple_server/hash_msg_handler.hpp>
+#include <simple_server/thread_helper.hpp>
 #include <boost/asio.hpp>
 
 int main(int argc, char * argv[])
@@ -12,6 +13,6 @@ int main(int argc, char * argv[])
     signals.async_wait([&](auto, auto) {
         server.Stop();
     });
-    ioCtx.run();
+    simple_server::ThreadPool workers(ioCtx);
     return 0;
 }
