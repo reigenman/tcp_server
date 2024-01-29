@@ -3,8 +3,15 @@
 #include <string>
 #include <simple_server/msg_handler.hpp>
 #include <boost/asio/io_context.hpp>
+#include <stdexcept>
 
 namespace simple_server {
+
+class ServerInvalidArgError : public std::invalid_argument {
+public:
+    explicit ServerInvalidArgError(const std::string & what) : std::invalid_argument(what) {}
+    explicit ServerInvalidArgError(const char* what) : std::invalid_argument(what) {}
+};
 
 class Server {
 public:

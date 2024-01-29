@@ -2,6 +2,7 @@
 #include <simple_server/acceptor.hpp>
 #include <simple_server/client_controller.hpp>
 #include <atomic>
+#include <boost/format.hpp>
 
 namespace simple_server {
 
@@ -13,10 +14,10 @@ public:
         boost::system::error_code ec;
         auto addr = net::ip::make_address(address, ec);
         if (ec) {
-            throw std::invalid_argument("Sever: tcp address is invalid");
+            throw ServerInvalidArgError(boost::str(boost::format("Sever: tcp address %1% is invalid") % address));
         }
         if (port == 0) {
-            throw std::invalid_argument("Sever: tcp port is invalid");
+            throw ServerInvalidArgError(boost::str(boost::format("Sever: tcp port %1% is invalid") % port));
         }
         auto socketHandler = [clCtr = clientCtrl_](auto && sock) {
             clCtr->Accept(std::move(sock));

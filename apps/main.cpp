@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
     desc.add_options()
         ("help", "produce help message")
         ("addr", po::value<std::string>(&host)->default_value(std::string(kDefaultHost)), "tcp address to listen")
-        ("port",  po::value<uint16_t>(&port)->default_value(kDefaultPort), "tcp port to listen in range 1-")
+        ("port",  po::value<uint16_t>(&port)->default_value(kDefaultPort), "tcp port to listen")
     ;
 
     try {
@@ -46,6 +46,7 @@ int main(int argc, char * argv[])
             std::cout << desc << "\n";
             return 1;
         }
+
     } catch (const std::exception & ex) {
         std::cerr << ex.what() << "\n";
         std::cerr << desc << "\n";
@@ -55,7 +56,7 @@ int main(int argc, char * argv[])
     try {
         RunServer(host, port);
         return 0;
-    } catch (const std::invalid_argument & ex) {
+    } catch (const simple_server::ServerInvalidArgError & ex) {
         std::cerr << "invalid program arguments: " << ex.what() << "\n";
     } catch (const std::exception & ex) {
         std::cerr << "failed with exception: " << ex.what() << "\n";
