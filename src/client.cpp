@@ -67,7 +67,7 @@ void Client::Stop()
 
 void Client::UpdateDeadline()
 {
-    deadline_ = std::chrono::steady_clock::now() + 30s;
+    deadline_ = std::chrono::steady_clock::now() + 60s;
 }
 
 void Client::Watchdog()
