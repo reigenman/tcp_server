@@ -2,7 +2,21 @@
 
 Simple tcp async server using boost::asio in callback style.
 
-Returns SHA256 using openssl
+Returns SHA256 using openssl.
+How to run:
+```
+Allowed options:
+  --help                produce help message
+  --addr arg (=0.0.0.0) tcp address to listen
+  --port arg (=8088)    tcp port to listen
+
+# examples
+simple-server
+
+simple-server --port 9090
+simple-server --addr 127.0.0.1
+simple-server --addr 0.0.0.0 --port 8090
+```
 
 # Timeout for an idle connection
 If the connection is idle for 60 seconds the server will close it.
@@ -43,6 +57,6 @@ To simple build and run the app there is Dockerfile.
 
 ```
 docker build . -t test/tcp-server
-docker run --rm -it -p 8088:80 test/tcp-server  0.0.0.0 80 
+docker run --rm -it -p 8088:80 test/tcp-server  --addr 0.0.0.0 --port 80 
 ```
 

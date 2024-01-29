@@ -8,7 +8,9 @@ RUN apt-get update \
     && pip3 install conan && conan profile detect
 
 
-RUN mkdir /workspace && cd /workspace && git clone https://github.com/reigenman/tcp_server.git
+RUN mkdir -p /workspace/tcp_server
+
+COPY . /workspace/tcp_server
 
 WORKDIR /workspace/tcp_server
 

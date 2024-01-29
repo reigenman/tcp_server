@@ -10,7 +10,14 @@ public:
     Private(boost::asio::io_context & ioCtx, HandlerContextPtr && handler, const std::string & address, uint16_t port)
         : clientCtrl_(std::make_shared<ClientController>(std::move(handler)))
     {
-        auto addr = net::ip::make_address(address);
+        boost::system::error_code ec;
+        auto addr = net::ip::make_address(address, ec);
+        if (ec) {
+            throw std::invalid_argument("Sever: tcp address is invalid");
+        }
+        if (port == 0) {
+            throw std::invalid_argument("Sever: tcp port is invalid");
+        }
         auto socketHandler = [clCtr = clientCtrl_](auto && sock) {
             clCtr->Accept(std::move(sock));
         };
