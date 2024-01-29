@@ -4,6 +4,8 @@ Simple tcp async server using boost::asio in callback style.
 
 Returns SHA256 using openssl
 
+If the connection is idle for 30 seconds the server will close it.
+
 # install conan and confgure default profile
 
 ```bash
