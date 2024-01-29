@@ -16,13 +16,19 @@ public:
     void Start();
     void Stop();
 private:
+    void UpdateDeadline();
+    void Watchdog();
     void Read();
     void Write();
     void HandleRead(const bs::error_code & ec, size_t readNum);
     void HandleWrite(const bs::error_code & ec, size_t);
     void HandleStop();
+    void CloseStream();
+    void DoStop();
 
     tcp::socket stream_;
+    std::chrono::steady_clock::time_point deadline_;
+    net::steady_timer timer_;
     std::string logTag_;
     StreamHandlerPtr streamHandler_;
     std::string rdBuf_;

@@ -6,7 +6,7 @@
 #include <boost/format.hpp>
 
 namespace simple_server {
-
+using namespace std::chrono_literals;
 namespace {
 
 // telnet use \r\n
@@ -21,6 +21,7 @@ std::string_view DbgMsgStrip(std::string_view msg)
 
 Client::Client(tcp::socket && socket, StreamHandlerPtr streamHandler, std::shared_ptr<ClientRegistry> registry)
     : stream_(std::move(socket))
+    , timer_(stream_.get_executor())
     , streamHandler_(std::move(streamHandler))
     , registry_(registry)
 {
@@ -47,7 +48,13 @@ void Client::Start()
     if (!registry || !registry->Attach(self)) {
         return;
     }
+    UpdateDeadline();
     Read();
+    net::post(stream_.get_executor(), [this, self]() {
+        if (stopped_)
+            return;
+        Watchdog();
+    });
 }
 
 void Client::Stop()
@@ -55,6 +62,31 @@ void Client::Stop()
     auto self = shared_from_this();
     net::post(stream_.get_executor(), [this, self]() {
         HandleStop();
+    });
+}
+
+void Client::UpdateDeadline()
+{
+    deadline_ = std::chrono::steady_clock::now() + 20s;
+}
+
+void Client::Watchdog()
+{
+    auto self = shared_from_this();
+    timer_.expires_at(deadline_);
+    timer_.async_wait([this, self](auto) {
+        if (stopped_) {
+            return;
+        }
+        auto now = std::chrono::steady_clock::now();
+        if (deadline_ > now) {
+            Watchdog();
+            return;
+        }
+
+        stopped_ = true;
+        CloseStream();
+        std::cerr << boost::format("session %1% tout\n") % logTag_;
     });
 }
 
@@ -81,9 +113,10 @@ void Client::HandleRead(const bs::error_code & ec, size_t readNum)
 
     if (ec) {
         std::cerr << boost::format("session %1% read op finished with status: %2%\n") % logTag_ % ec.message();
+        DoStop();
         return;
     }
-
+    UpdateDeadline();
     // don't modify rdBuf while line is used
     const auto line = std::string_view(rdBuf_).substr(0, readNum - 1);
     std::cerr << boost::format("session %1% got message: \"%2%\", total buf size: %3%\n") % logTag_ % DbgMsgStrip(line) % rdBuf_.size();
@@ -105,6 +138,7 @@ void Client::HandleWrite(const bs::error_code & ec, size_t)
 
     if (ec) {
         std::cerr << boost::format("session %1% write op finished with status: %2%\n") % logTag_ % ec.message();
+        DoStop();
         return;
     }
     Read();
@@ -114,12 +148,23 @@ void Client::HandleStop()
 {
     if (stopped_)
         return;
+    DoStop();
+}
 
-    stopped_ = true;
-
+void Client::CloseStream()
+{
     bs::error_code ec;
     stream_.shutdown(tcp::socket::shutdown_both, ec);
     stream_.close(ec);
+}
+
+void Client::DoStop()
+{
+    stopped_ = true;
+
+    bs::error_code ec;
+    timer_.cancel(ec);
+    CloseStream();
 }
 
 } // namespace simple_server
