@@ -34,3 +34,12 @@ cmake --preset conan-release
 cmake  --build  --preset conan-release
 ```
 
+# Dockerfile
+
+To simple build and run the app there is Dockerfile.
+
+```
+docker build . -t test/tcp-server
+docker run --rm -it -p 8088:80 test/tcp-server  0.0.0.0 80 
+```
+
