@@ -10,6 +10,7 @@ set(HEADER_LIST
     "${SimpleTcpServer_SOURCE_DIR}/include/simple_server/client_controller.hpp"
     "${SimpleTcpServer_SOURCE_DIR}/include/simple_server/net.hpp"
     "${SimpleTcpServer_SOURCE_DIR}/include/simple_server/thread_helper.hpp"
+    "${SimpleTcpServer_SOURCE_DIR}/include/simple_server/line_buf.hpp"
 )
 
 # Make an automatic library - will be static or dynamic based on user setting

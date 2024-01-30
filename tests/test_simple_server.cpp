@@ -2,7 +2,9 @@
 #include <simple_server/server.hpp>
 #include <simple_server/hash_msg_handler.hpp>
 #include <simple_server/thread_helper.hpp>
+#include <simple_server/line_buf.hpp>
 #include <boost/asio.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace net = boost::asio;
 namespace bs = boost::system;
@@ -179,5 +181,31 @@ TEST_F(ServerFixture, MultipleClients)
         ASSERT_FALSE(ec);
         ASSERT_EQ(response, GetResponse(msg));
         ASSERT_EQ(len, response.size());
+    }
+}
+
+TEST(LineBuf, SimpleRead)
+{
+    simple_server::LineBuf lineBuf(32);
+
+    const std::string str = "\n123\n45\n\n67";
+    std::vector<uint8_t> input(str.begin(), str.end());
+    std::copy(input.begin(), input.end(), lineBuf.GetBuf().begin());
+    lineBuf.Commit(input.size());
+    std::vector<std::vector<uint8_t>> lines;
+    boost::split(lines, input, boost::is_any_of("\n"));
+    for (size_t i = 0; i < lines.size() - 1; ++i) {
+        lines[i].push_back('\n');
+    }
+
+    for (const auto & line : lines) {
+        auto rdLine = lineBuf.Read();
+        ASSERT_EQ(rdLine.size(), line.size());
+        ASSERT_TRUE(std::equal(line.begin(), line.end(), rdLine.begin()));
+    }
+    for (int i = 0; i < 2; ++i) {
+        auto rdLine = lineBuf.Read();
+        ASSERT_TRUE(rdLine.empty());
+        ASSERT_TRUE(lineBuf.IsEmpty());
     }
 }
