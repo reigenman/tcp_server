@@ -1,24 +1,20 @@
 #pragma once
-#include <boost/core/span.hpp>
-#include <vector>
-#include <algorithm>
+#include <string>
 #include <stdexcept>
 
 namespace simple_server {
 
-
 class LineBuf {
 public:
-    static constexpr uint8_t kEndMark = '\n';
+    static constexpr char kEndMark = '\n';
 
-    using ByteBuf = std::vector<uint8_t>;
-    using Span = boost::span<const uint8_t>;
+    using Buf = std::string;
 
     explicit LineBuf(size_t len)
         : data_(len, 0)
     {}
 
-    ByteBuf & GetBuf()
+    Buf & GetBuf()
     {
         return data_;
     }
@@ -27,28 +23,27 @@ public:
         if (len > data_.size()) {
             throw std::runtime_error("LineBuf::Commit len > size()");
         }
-        rdSlice_ = Span(data_).subspan(0, len);
+        rdSlice_ = std::string_view(data_).substr(0, len);
     }
 
-    Span Read()
+    std::string_view Read()
     {
-        auto it = std::find(rdSlice_.begin(), rdSlice_.end(), kEndMark);
-        if (it == rdSlice_.end()) {
-            auto line = rdSlice_;
-            rdSlice_ = Span();
-            return line;
+        auto pos = rdSlice_.find(kEndMark);
+        if (pos == std::string_view::npos) {
+            pos = rdSlice_.size();
+        } else {
+            pos += 1;
         }
-        size_t lineSize = std::distance(std::begin(rdSlice_), it) + 1;
-        auto line = rdSlice_.first(lineSize);
-        rdSlice_ = rdSlice_.last(rdSlice_.size() - lineSize);
+        auto line = rdSlice_.substr(0, pos);
+        rdSlice_ = rdSlice_.substr(pos);
         return line;
     }
 
     bool IsEmpty() const { return rdSlice_.empty(); }
 
 private:
-    std::vector<uint8_t> data_;
-    Span rdSlice_;
+    std::string data_;
+    std::string_view rdSlice_;
 };
 
 } //namespace simple_server

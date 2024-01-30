@@ -188,11 +188,10 @@ TEST(LineBuf, SimpleRead)
 {
     simple_server::LineBuf lineBuf(32);
 
-    const std::string str = "\n123\n45\n\n67";
-    std::vector<uint8_t> input(str.begin(), str.end());
+    const std::string input = "\n123\n45\n\n67";
     std::copy(input.begin(), input.end(), lineBuf.GetBuf().begin());
     lineBuf.Commit(input.size());
-    std::vector<std::vector<uint8_t>> lines;
+    std::vector<std::string> lines;
     boost::split(lines, input, boost::is_any_of("\n"));
     for (size_t i = 0; i < lines.size() - 1; ++i) {
         lines[i].push_back('\n');
@@ -201,8 +200,25 @@ TEST(LineBuf, SimpleRead)
     for (const auto & line : lines) {
         auto rdLine = lineBuf.Read();
         ASSERT_EQ(rdLine.size(), line.size());
-        ASSERT_TRUE(std::equal(line.begin(), line.end(), rdLine.begin()));
+        ASSERT_EQ(std::string_view(line), rdLine);
     }
+    for (int i = 0; i < 2; ++i) {
+        auto rdLine = lineBuf.Read();
+        ASSERT_TRUE(rdLine.empty());
+        ASSERT_TRUE(lineBuf.IsEmpty());
+    }
+}
+
+TEST(LineBuf, EmptyRead)
+{
+    simple_server::LineBuf lineBuf(32);
+
+    for (int i = 0; i < 2; ++i) {
+        auto rdLine = lineBuf.Read();
+        ASSERT_TRUE(rdLine.empty());
+        ASSERT_TRUE(lineBuf.IsEmpty());
+    }
+    lineBuf.Commit(0);
     for (int i = 0; i < 2; ++i) {
         auto rdLine = lineBuf.Read();
         ASSERT_TRUE(rdLine.empty());
