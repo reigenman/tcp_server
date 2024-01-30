@@ -3,10 +3,11 @@
 #include <simple_server/client_controller.hpp>
 #include <atomic>
 #include <boost/format.hpp>
+#include <boost/core/noncopyable.hpp>
 
 namespace simple_server {
 
-class Server::Private {
+class Server::Private : boost::noncopyable {
 public:
     Private(boost::asio::io_context & ioCtx, HandlerContextPtr && handler, const std::string & address, uint16_t port)
         : clientCtrl_(std::make_shared<ClientController>(std::move(handler)))
