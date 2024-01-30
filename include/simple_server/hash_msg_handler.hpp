@@ -7,7 +7,7 @@ namespace simple_server {
 class HashStreamHandler : public StreamHandler {
 public:
     void HandleChunk(const std::string_view & chunk) override;
-    std::string FinalizeMessge() override;
+    std::string FinalizeMessage() override;
 
     void HandleMessage(const std::string_view & request, std::string & response);
 private:

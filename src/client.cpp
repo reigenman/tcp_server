@@ -155,7 +155,7 @@ void Client::HandleChunk()
     chunk.remove_suffix(1);
 
     streamHandler_->HandleChunk(chunk);
-    wrBuf_ = streamHandler_->FinalizeMessge();
+    wrBuf_ = streamHandler_->FinalizeMessage();
 
     wrBuf_.push_back('\n');
     Write();

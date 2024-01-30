@@ -9,7 +9,7 @@ public:
     virtual ~StreamHandler() = default;
 
     virtual void HandleChunk(const std::string_view & chunk) = 0;
-    virtual std::string FinalizeMessge() = 0;
+    virtual std::string FinalizeMessage() = 0;
 };
 
 using StreamHandlerPtr = std::unique_ptr<StreamHandler>;

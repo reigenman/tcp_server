@@ -12,7 +12,7 @@ void HashStreamHandler::HandleChunk(const std::string_view & chunk)
     msg_.append(chunk.begin(), chunk.end());
 }
 
-std::string HashStreamHandler::FinalizeMessge()
+std::string HashStreamHandler::FinalizeMessage()
 {
     std::string result;
     HandleMessage(msg_, result);
