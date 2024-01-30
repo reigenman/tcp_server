@@ -8,7 +8,8 @@ class StreamHandler {
 public:
     virtual ~StreamHandler() = default;
 
-    virtual void HandleMessage(const std::string_view & request, std::string & response) = 0;
+    virtual void HandleChunk(const std::string_view & chunk) = 0;
+    virtual std::string FinalizeMessge() = 0;
 };
 
 using StreamHandlerPtr = std::unique_ptr<StreamHandler>;

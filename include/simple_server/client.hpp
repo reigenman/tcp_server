@@ -1,6 +1,7 @@
 #pragma once
 #include <simple_server/net.hpp>
 #include <simple_server/msg_handler.hpp>
+#include <simple_server/line_buf.hpp>
 #include <memory>
 #include <boost/core/noncopyable.hpp>
 
@@ -22,6 +23,7 @@ private:
     void Write();
     void HandleRead(const bs::error_code & ec, size_t readNum);
     void HandleWrite(const bs::error_code & ec, size_t);
+    void HandleChunk();
     void HandleStop();
     void CloseStream();
     void DoStop();
@@ -31,7 +33,10 @@ private:
     net::steady_timer timer_;
     std::string logTag_;
     StreamHandlerPtr streamHandler_;
-    std::string rdBuf_;
+
+    // Size of the buffer for read depends on compromise beetween reading effecency of number sock.read() calls
+    // and the memory consumption by concurrent clients.
+    LineBuf rdBuf_{2048};
     std::string wrBuf_;
     bool stopped_{false};
     std::weak_ptr<ClientRegistry> registry_;

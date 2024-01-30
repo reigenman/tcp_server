@@ -64,7 +64,12 @@ bool Acceptor::HandleAccept(const bs::error_code & ec, tcp::socket && socket)
     if (ec) {
         std::cerr << boost::format("acceptor got an error: %1%\n") % ec.message();
     } else {
-        handler_(std::move(socket));
+        try {
+            handler_(std::move(socket));
+        } catch (const std::exception & e) {
+            std::cerr << boost::format("acceptor handler exception: %1%\n") % e.what();
+        }
+
     }
     return true;
 }

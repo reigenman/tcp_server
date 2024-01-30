@@ -7,6 +7,19 @@
 namespace simple_server {
 
 
+void HashStreamHandler::HandleChunk(const std::string_view & chunk)
+{
+    msg_.append(chunk.begin(), chunk.end());
+}
+
+std::string HashStreamHandler::FinalizeMessge()
+{
+    std::string result;
+    HandleMessage(msg_, result);
+    msg_.clear();
+    return result;
+}
+
 void HashStreamHandler::HandleMessage(const std::string_view & request, std::string & response)
 {
     std::array<unsigned char, SHA256_DIGEST_LENGTH> hash;

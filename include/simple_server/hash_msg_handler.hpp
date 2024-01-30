@@ -6,7 +6,12 @@ namespace simple_server {
 
 class HashStreamHandler : public StreamHandler {
 public:
-    void HandleMessage(const std::string_view & request, std::string & response) override;
+    void HandleChunk(const std::string_view & chunk) override;
+    std::string FinalizeMessge() override;
+
+    void HandleMessage(const std::string_view & request, std::string & response);
+private:
+    std::string msg_;
 };
 
 

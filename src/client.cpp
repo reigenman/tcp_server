@@ -93,7 +93,7 @@ void Client::Watchdog()
 void Client::Read()
 {
     auto self = shared_from_this();
-    net::async_read_until(stream_, net::dynamic_buffer(rdBuf_), "\n", [this, self](const auto & ec, auto n) {
+    stream_.async_read_some(net::buffer(rdBuf_.GetBuf()), [this, self](const auto & ec, auto n) {
         HandleRead(ec, n);
     });
 }
@@ -117,18 +117,10 @@ void Client::HandleRead(const bs::error_code & ec, size_t readNum)
         return;
     }
     UpdateDeadline();
-    // don't modify rdBuf while line is used
-    const auto line = std::string_view(rdBuf_).substr(0, readNum - 1);
-    std::cerr << boost::format("session %1% got message: \"%2%\", total buf size: %3%\n") % logTag_ % DbgMsgStrip(line) % rdBuf_.size();
+    rdBuf_.Commit(readNum);
 
-    wrBuf_.clear();
-
-    streamHandler_->HandleMessage(line, wrBuf_);
-
-    rdBuf_.erase(0, readNum);
-
-    wrBuf_.push_back('\n');
-    Write();
+    std::cerr << boost::format("session %1% read %2% bytes\n") % logTag_ % readNum;
+    HandleChunk();
 }
 
 void Client::HandleWrite(const bs::error_code & ec, size_t)
@@ -141,7 +133,32 @@ void Client::HandleWrite(const bs::error_code & ec, size_t)
         DoStop();
         return;
     }
-    Read();
+    UpdateDeadline();
+
+    HandleChunk();
+}
+
+void Client::HandleChunk()
+{
+    auto chunk = rdBuf_.Read();
+
+    if (chunk.empty()) {
+        Read();
+        return;
+    }
+
+    if (chunk.back() != '\n') {
+        streamHandler_->HandleChunk(chunk);
+        Read();
+        return;
+    }
+    chunk.remove_suffix(1);
+
+    streamHandler_->HandleChunk(chunk);
+    wrBuf_ = streamHandler_->FinalizeMessge();
+
+    wrBuf_.push_back('\n');
+    Write();
 }
 
 void Client::HandleStop()
