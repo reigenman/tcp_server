@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <simple_server/server.hpp>
+#include <simple_server/client.hpp>
 #include <simple_server/hash_msg_handler.hpp>
 #include <simple_server/thread_helper.hpp>
 #include <simple_server/line_buf.hpp>
@@ -79,6 +80,33 @@ TEST_F(ServerFixture, TwoRequests)
     ASSERT_FALSE(ec);
     const std::string msg1 = "123\n";
     const std::string msg2 = "456\n";
+    auto msg = msg1 + msg2;
+    net::write(client, net::buffer(msg), ec);
+    ASSERT_FALSE(ec);
+    std::string response;
+    auto len = net::read_until(client, net::dynamic_buffer(response), "\n", ec);
+    ASSERT_FALSE(ec);
+    auto response1 = response.substr(0, len);
+    ASSERT_EQ(response1, GetResponse(msg1));
+    response.erase(0, len);
+
+    len = net::read_until(client, net::dynamic_buffer(response), "\n", ec);
+    ASSERT_FALSE(ec);
+    auto response2 = response.substr(0, len);
+    ASSERT_EQ(response2, GetResponse(msg2));
+    response.erase(0, len);
+    ASSERT_TRUE(response.empty());
+}
+
+TEST_F(ServerFixture, TwoBigRequests)
+{
+    auto & ioCtx = GetIoContext();
+    tcp::socket client(ioCtx);
+    bs::error_code ec;
+    client.connect(GetEndpoint(), ec);
+    ASSERT_FALSE(ec);
+    const std::string msg1 = std::string(4 * simple_server::Client::kDefaultReadBufSize , '1') + "\n";
+    const std::string msg2 = std::string(8 * simple_server::Client::kDefaultReadBufSize, '2') + "\n";
     auto msg = msg1 + msg2;
     net::write(client, net::buffer(msg), ec);
     ASSERT_FALSE(ec);

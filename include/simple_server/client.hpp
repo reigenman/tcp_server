@@ -11,6 +11,7 @@ class ClientRegistry;
 
 class Client : public std::enable_shared_from_this<Client>, boost::noncopyable {
 public:
+    static constexpr size_t kDefaultReadBufSize = 2048;
     Client(tcp::socket && socket, StreamHandlerPtr streamHandler, std::shared_ptr<ClientRegistry> registry);
     ~Client();
 
@@ -36,7 +37,7 @@ private:
 
     // Size of the buffer for read depends on compromise beetween reading effecency of number sock.read() calls
     // and the memory consumption by concurrent clients.
-    LineBuf rdBuf_{2048};
+    LineBuf rdBuf_{kDefaultReadBufSize};
     std::string wrBuf_;
     bool stopped_{false};
     std::weak_ptr<ClientRegistry> registry_;
