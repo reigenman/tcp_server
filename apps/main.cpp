@@ -37,10 +37,11 @@ int main(int argc, char * argv[])
         ("addr", po::value<std::string>(&host)->default_value(std::string(kDefaultHost)), "tcp address to listen")
         ("port",  po::value<uint16_t>(&port)->default_value(kDefaultPort), "tcp port to listen")
     ;
+    po::positional_options_description pd;
 
     try {
         po::variables_map vm;
-        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::store(po::command_line_parser(argc, argv).options(desc).positional(pd).run(), vm);
         po::notify(vm);
         if (vm.count("help")) {
             std::cout << desc << "\n";
