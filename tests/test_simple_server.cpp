@@ -31,8 +31,7 @@ public:
 
     std::string GetResponse(const std::string & msg)
     {
-        std::string result;
-        hasher_.HandleMessage(std::string_view(msg).substr(0, msg.length() -1), result);
+        std::string result =  simple_server::HashStreamHandler::HashMessage(std::string_view(msg).substr(0, msg.length() -1));
         result.push_back('\n');
         return result;
     }
@@ -50,7 +49,6 @@ protected:
     boost::asio::io_context ioCtx_;
     std::unique_ptr<simple_server::ThreadPool> threads_;
     std::unique_ptr<simple_server::Server> server_;
-    simple_server::HashStreamHandler hasher_;
 };
 
 
